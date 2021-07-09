@@ -5,7 +5,7 @@ metadata:
   namespace: ns-demo
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: psp-permissive
 subjects:
 - kind: ServiceAccount

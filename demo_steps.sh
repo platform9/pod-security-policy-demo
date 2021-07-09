@@ -1,48 +1,45 @@
-# Create the pod secutiry policies
+# Create a new namespace for the nginx deployment demo
+kubectl apply -f ns-demo-namespace.yaml
+
+# Create a service account for nginx
+kubectl apply -f nginx-serviceaccount.yaml
+
+# Create the pod security policies
 kubectl apply -f psps/permissive.yaml
 kubectl apply -f psps/restrictive.yaml
 
-# Create the clusterroles
-kubectl apply -f rbac/roles/permissive-clusterrole.yaml
-kubectl apply -f rbac/roles/restrictive-clusterrole.yaml
+# Create the roles
+kubectl apply -f roles/permissive-role.yaml
+kubectl apply -f roles/restrictive-role.yaml
 
-# Create a restrictive clusterrolebinding that will
-# bind the restrictive policy cluster-wide
-kubectl apply -f rbac/bindings/restrictive-clusterrolebinding.yaml
+# Create a restrictive rolebinding that will bind the restrictive
+# policy with all service accounts in the ns-demo namespace
+kubectl apply -f rolebindings/restrictive-nginx-rolebinding.yaml
 
 
-# Create permissive rolebindings for specific service accounts
-# that will bind the permissive policy with only a few service
-# accounts defined under the subjects section
-kubectl apply -f rbac/bindings/permissive-rolebinding
+# Now, let's create an nginx deployment that does not require
+# privileged access
+kubectl apply -f deployments/simple-nginx-deployment.yaml
 
-# Check the status of pods, deployments and replicasets
-kubectl get all -A
-
-# App demo with nginx deployments
-# Create a new namespace for the demo. Also, create a service account for later
-kubectl apply -f app_demo/ns-demo.yaml
-
-# Create an nginx deployment that doesn't require hostNetwork access
-kubectl apply -f app_demo/simple-nginx-deployment.yaml
-
-# The above deployment should be up and running with all its pods in the running state
+# Check the status of pods, deployments and replicasets. The pods
+# should be in the 'Running' state for this deployment
 kubectl get all -n ns-demo
 
-# You can check the annotations for nginx pods to validate
-# that the restrictive policy is applied to the pods
-kubectl -n ns-demo get po <POD_NAME> -o jsonpath='{.metadata.annotations}'
+# Next, let's create another nginx deployment, that requires
+# access to the hostNetwork
+kubectl apply -f deployments/priv-nginx-deployment.yaml
 
-# Now, create the nginx deployment that requires privileged access
-kubectl apply -f app_demo/priv-nginx-deployment.yaml
+# Check the status of the pods, deployments and replicasets.
+# You will notice that there are no pods listed for this
+# deployment. Describe the corresponding replicaset to
+# know the reason behind this
+kubeclt -n ns-demo describe rs <priv_RS_NAME>
 
-# The deployment will not have any pods deployed
+# Now, let's create a rolebinding that will provide access
+# to the permissive pod security policy to the nginx service
+# account
+kubectl apply -f rolebindings/permissive-nginx-rolebinding.yaml
+
+# Check the status of pods, deployments and replicasets again.
+# The pods should be in the 'Running' state for this deployment
 kubectl get all -n ns-demo
-
-# Check the replica set for the error
-kubectl -n ns-demo describe rs <priv-nginx-someid>
-
-# Now, let's create a rolebinding that binds the nginx service account with
-# the permissive policy. Note, that our privileged deployment used the nginx
-# service account
-kubectl apply -f app_demo/nginx-rolebinding.yaml
