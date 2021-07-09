@@ -2,27 +2,35 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: restrictive
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: "runtime/default"
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: "runtime/default"
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: "runtime/default"
+    apparmor.security.beta.kubernetes.io/defaultProfileName: "runtime/default"
 spec:
   privileged: false
-  hostNetwork: false
-  allowPrivilegeEscalation: false
-  defaultAllowPrivilegeEscalation: false
-  hostPID: false
-  hostIPC: false
-  runAsUser:
-    rule: RunAsAny
   fsGroup:
-    rule: RunAsAny
+    rule: "MustRunAs"
+    ranges:
+      - min: 1
+        max: 65535
+  runAsUser:
+    rule: "MustRunAs"
+    ranges:
+      - min: 1
+        max: 65535
   seLinux:
     rule: RunAsAny
   supplementalGroups:
     rule: RunAsAny
   volumes:
-  - 'configMap'
-  - 'downwardAPI'
-  - 'emptyDir'
-  - 'persistentVolumeClaim'
-  - 'secret'
-  - 'projected'
-  allowedCapabilities:
-  - '*'
+    - "emptyDir"
+    - "secret"
+    - "downwardAPI"
+    - "configMap"
+    - "persistentVolumeClaim"
+    - "projected"
+  hostPID: false
+  hostIPC: false
+  hostNetwork: false
+  allowPrivilegeEscalation: false
