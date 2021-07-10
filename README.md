@@ -9,4 +9,4 @@ git clone https://github.com/platform9/pod-security-policy-demo.git
 ```
 export KUBECONFIG=/path/to/your/kubeconfig.yaml
 ```
-3. Run the commands in `demo_steps.sh` sequentially.
+3. Run the commands in [demo_steps.sh](demo_steps.sh) sequentially.
