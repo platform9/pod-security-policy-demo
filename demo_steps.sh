@@ -1,8 +1,8 @@
 # Create a new namespace for the nginx deployment demo
-kubectl apply -f ns-demo-namespace.yaml
+kubectl apply -f namespace.yaml
 
 # Create a service account for nginx
-kubectl apply -f nginx-serviceaccount.yaml
+kubectl apply -f serviceaccount.yaml
 
 # Create the pod security policies
 kubectl apply -f psps/permissive.yaml
