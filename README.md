@@ -1,4 +1,4 @@
-# Pod Security Policy with Platform9 Managed Kubernetes
+# Understanding Pod Security Policies
 
 ## How to use the files in this repo
 1. Clone this repo
